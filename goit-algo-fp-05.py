@@ -8,6 +8,7 @@ class Node:
         self.right = None
         self.val = key
         self.id = str(uuid.uuid4())
+        self.color = None  # Додано ініціалізацію кольору
 
     def add_edges(self, graph, node, pos, x=0, y=0, layer=1):
         if node is not None:
@@ -22,6 +23,7 @@ class Node:
                 r = x + 1 / 2 ** layer
                 pos[node.right.id] = (r, y - 1)
                 r = self.add_edges(graph, node.right, pos, x=r, y=y - 1, layer=layer + 1)
+            self.color = None  # Додано ініціалізацію кольору для кожної вершини
         return graph
 
     def draw_tree(self, traversal_type, font_size=10):
@@ -29,10 +31,15 @@ class Node:
         pos = {self.id: (0, 0)}
         tree = self.add_edges(tree, self, pos)
 
-        # Генеруємо послідовність кольорів для вузлів
+        # Згенерувано кольори для вузлів
         colors = self.generate_colors(traversal_type)
 
+        # Встановлено кольори вузлів на основі типу обходу
+        for node_id, node_data in tree.nodes(data=True):
+            node_data["color"] = colors.pop(0)  # Встановлюємо колір вершини відповідно до послідовності BFS
+
         labels = {node[0]: node[1]["label"] for node in tree.nodes(data=True)}
+        node_colors = [node[1]["color"] for node in tree.nodes(data=True)]
         plt.figure(figsize=(8, 5))
         nx.draw(
             tree,
@@ -40,9 +47,9 @@ class Node:
             labels=labels,
             arrows=False,
             node_size=2500,
-            node_color=colors,  
+            node_color=node_colors,  
             font_size=font_size,
-            font_color="white"  
+            font_color="white"
         )
         plt.show()
 
@@ -50,19 +57,19 @@ class Node:
         if traversal_type == "DFS":
             base_color = (0.05, 0.588, 0.941)  
         elif traversal_type == "BFS":
-            base_color = (0.8, 0, 0)  
+            base_color = (0.8, 0, 0) 
 
         colors = []
         num_colors = 15
         for i in range(num_colors):
-            intensity = 0.07 * i  
+            intensity = 0.07 * i
             color = (
                 max(0, base_color[0] - intensity),
                 max(0, base_color[1] - intensity),
                 max(0, base_color[2] - intensity),
             )
             colors.append(color)
-        return colors[::-1]  
+        return colors[::-1]
 
 def main():
     root = Node(1)
@@ -81,7 +88,7 @@ def main():
     root.right.right.left = Node(14)
     root.right.right.right = Node(15)
     root.draw_tree(traversal_type="DFS")  
-    root.draw_tree(traversal_type="BFS")  
+    root.draw_tree(traversal_type="BFS") 
 
 if __name__ == "__main__":
     main()
