@@ -39,11 +39,13 @@ class Node:
 
     def bfs_traversal(self):
         queue = deque([self])
+        visited = set()
 
         while queue:
             current_node = queue.popleft()
-            if current_node:
+            if current_node and current_node not in visited:
                 current_node.color = "#00FF00"  
+                visited.add(current_node)
                 for neighbor in [current_node.left, current_node.right]:
                     if neighbor:
                         queue.append(neighbor)
@@ -53,6 +55,11 @@ class Node:
         tree = nx.DiGraph()
         pos = {self.id: (0, 0)}
         tree = self.add_edges(tree, self, pos)
+
+        if traversal_type == "DFS":
+            self.dfs_traversal()
+        elif traversal_type == "BFS":
+            self.bfs_traversal()
 
         colors = self.generate_colors(traversal_type)
 
@@ -81,7 +88,7 @@ class Node:
         if traversal_type == "DFS":
             base_color = (0.05, 0.588, 0.941)  
         elif traversal_type == "BFS":
-            base_color = (0.8, 0, 0) 
+            base_color = (0, 1, 0)  
 
         colors = []
         num_colors = 15
@@ -111,10 +118,11 @@ def main():
     root.right.left.right = Node(13)
     root.right.right.left = Node(14)
     root.right.right.right = Node(15)
-    root.dfs_traversal()  
+    
+    print("\nDFS:")
     root.draw_tree(traversal_type="DFS")  
-    root.bfs_traversal()  
-    root.draw_tree(traversal_type="BFS") 
+    print("\nBFS:")
+    root.draw_tree(traversal_type="BFS")  
 
 if __name__ == "__main__":
     main()
