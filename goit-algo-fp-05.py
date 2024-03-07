@@ -1,6 +1,7 @@
 import uuid
 import networkx as nx
 import matplotlib.pyplot as plt
+from collections import deque
 
 class Node:
     def __init__(self, key):
@@ -26,6 +27,28 @@ class Node:
             self.color = None  # Додано ініціалізацію кольору для кожної вершини
         return graph
 
+    def dfs_traversal(self, visited=None):
+        if visited is None:
+            visited = set()
+        visited.add(self)
+
+        for neighbor in [self.left, self.right]:
+            if neighbor and neighbor not in visited:
+                neighbor.color = "#FF0000"  # Зміна кольору вершини
+                neighbor.dfs_traversal(visited)
+
+    def bfs_traversal(self):
+        queue = deque([self])
+
+        while queue:
+            current_node = queue.popleft()
+            if current_node:
+                current_node.color = "#00FF00"  # Зміна кольору вершини
+                for neighbor in [current_node.left, current_node.right]:
+                    if neighbor:
+                        queue.append(neighbor)
+                        neighbor.color = "#00FF00"  # Зміна кольору вершини у BFS
+
     def draw_tree(self, traversal_type, font_size=10):
         tree = nx.DiGraph()
         pos = {self.id: (0, 0)}
@@ -36,10 +59,12 @@ class Node:
 
         # Встановлено кольори вузлів на основі типу обходу
         for node_id, node_data in tree.nodes(data=True):
-            node_data["color"] = colors.pop(0)  # Встановлюємо колір вершини відповідно до послідовності BFS
+            node_data["color"] = colors.pop(0)  # Встановлюємо колір вершини відповідно до послідовності DFS або BFS
 
         labels = {node[0]: node[1]["label"] for node in tree.nodes(data=True)}
         node_colors = [node[1]["color"] for node in tree.nodes(data=True)]
+        nodelist = [node[0] for node in tree.nodes(data=True)]  # Список вершин для відображення
+
         plt.figure(figsize=(8, 5))
         nx.draw(
             tree,
@@ -47,9 +72,10 @@ class Node:
             labels=labels,
             arrows=False,
             node_size=2500,
-            node_color=node_colors,  
+            node_color=node_colors,
             font_size=font_size,
-            font_color="white"
+            font_color="white",
+            nodelist=nodelist  # Додаємо параметр nodelist
         )
         plt.show()
 
@@ -87,7 +113,9 @@ def main():
     root.right.left.right = Node(13)
     root.right.right.left = Node(14)
     root.right.right.right = Node(15)
+    root.dfs_traversal()  
     root.draw_tree(traversal_type="DFS")  
+    root.bfs_traversal()  
     root.draw_tree(traversal_type="BFS") 
 
 if __name__ == "__main__":
