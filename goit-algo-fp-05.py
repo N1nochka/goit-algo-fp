@@ -9,7 +9,7 @@ class Node:
         self.right = None
         self.val = key
         self.id = str(uuid.uuid4())
-        self.color = None  # Додано ініціалізацію кольору
+        self.color = None  
 
     def add_edges(self, graph, node, pos, x=0, y=0, layer=1):
         if node is not None:
@@ -24,7 +24,7 @@ class Node:
                 r = x + 1 / 2 ** layer
                 pos[node.right.id] = (r, y - 1)
                 r = self.add_edges(graph, node.right, pos, x=r, y=y - 1, layer=layer + 1)
-            self.color = None  # Додано ініціалізацію кольору для кожної вершини
+            self.color = None  
         return graph
 
     def dfs_traversal(self, visited=None):
@@ -34,7 +34,7 @@ class Node:
 
         for neighbor in [self.left, self.right]:
             if neighbor and neighbor not in visited:
-                neighbor.color = "#FF0000"  # Зміна кольору вершини
+                neighbor.color = "#FF0000"  
                 neighbor.dfs_traversal(visited)
 
     def bfs_traversal(self):
@@ -43,27 +43,25 @@ class Node:
         while queue:
             current_node = queue.popleft()
             if current_node:
-                current_node.color = "#00FF00"  # Зміна кольору вершини
+                current_node.color = "#00FF00"  
                 for neighbor in [current_node.left, current_node.right]:
                     if neighbor:
                         queue.append(neighbor)
-                        neighbor.color = "#00FF00"  # Зміна кольору вершини у BFS
+                        neighbor.color = "#00FF00"  
 
     def draw_tree(self, traversal_type, font_size=10):
         tree = nx.DiGraph()
         pos = {self.id: (0, 0)}
         tree = self.add_edges(tree, self, pos)
 
-        # Згенерувано кольори для вузлів
         colors = self.generate_colors(traversal_type)
 
-        # Встановлено кольори вузлів на основі типу обходу
         for node_id, node_data in tree.nodes(data=True):
-            node_data["color"] = colors.pop(0)  # Встановлюємо колір вершини відповідно до послідовності DFS або BFS
+            node_data["color"] = colors.pop(0) 
 
         labels = {node[0]: node[1]["label"] for node in tree.nodes(data=True)}
         node_colors = [node[1]["color"] for node in tree.nodes(data=True)]
-        nodelist = [node[0] for node in tree.nodes(data=True)]  # Список вершин для відображення
+        nodelist = [node[0] for node in tree.nodes(data=True)]  
 
         plt.figure(figsize=(8, 5))
         nx.draw(
@@ -75,7 +73,7 @@ class Node:
             node_color=node_colors,
             font_size=font_size,
             font_color="white",
-            nodelist=nodelist  # Додаємо параметр nodelist
+            nodelist=nodelist  
         )
         plt.show()
 
