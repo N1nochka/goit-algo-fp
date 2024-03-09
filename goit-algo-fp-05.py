@@ -51,56 +51,54 @@ class Node:
                         queue.append(neighbor)
                         neighbor.color = "#00FF00"  
 
-    def draw_tree(self, traversal_type, font_size=10):
-        tree = nx.DiGraph()
-        pos = {self.id: (0, 0)}
-        tree = self.add_edges(tree, self, pos)
+def dfs_visualize(root, total_steps=1):
+    visited, stack = set(), [(root, 0)]
+    colors = {}
+    step = 0
+    while stack:
+        node, depth = stack.pop()
+        if node not in visited:
+            visited.add(node)
+            colors[node.id] = generate_color(step, total_steps)
+            step += 1
+            if node.right:
+                stack.append((node.right, depth + 1))
+            if node.left:
+                stack.append((node.left, depth + 1))
+    return colors
 
-        if traversal_type == "DFS":
-            self.dfs_traversal()
-        elif traversal_type == "BFS":
-            self.bfs_traversal()
 
-        colors = self.generate_colors(traversal_type)
+def bfs_visualize(root, total_steps=1):
+    visited, queue = set(), [root]
+    colors = {}
+    step = 0
+    while queue:
+        node = queue.pop(0)
+        if node not in visited:
+            visited.add(node)
+            colors[node.id] = generate_color(step, total_steps)
+            step += 1
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+    return colors
 
-        for node_id, node_data in tree.nodes(data=True):
-            node_data["color"] = colors.pop(0) 
+def generate_color(step, total_steps):
+    base_color = [135, 206, 250]  # світло-блакитний (skyblue) у форматі RGB
+    darken_factor = step / (2 * total_steps)  # Наскільки темнішим має бути кожен наступний вузол
+    new_color = [int(c * (1 - darken_factor)) for c in base_color]
+    return f'#{new_color[0]:02x}{new_color[1]:02x}{new_color[2]:02x}'
 
-        labels = {node[0]: node[1]["label"] for node in tree.nodes(data=True)}
-        node_colors = [node[1]["color"] for node in tree.nodes(data=True)]
-        nodelist = [node[0] for node in tree.nodes(data=True)]  
-
-        plt.figure(figsize=(8, 5))
-        nx.draw(
-            tree,
-            pos=pos,
-            labels=labels,
-            arrows=False,
-            node_size=2500,
-            node_color=node_colors,
-            font_size=font_size,
-            font_color="white",
-            nodelist=nodelist  
-        )
-        plt.show()
-
-    def generate_colors(self, traversal_type):
-        if traversal_type == "DFS":
-            base_color = (0.05, 0.588, 0.941)  
-        elif traversal_type == "BFS":
-            base_color = (0, 1, 0)  
-
-        colors = []
-        num_colors = 15
-        for i in range(num_colors):
-            intensity = 0.07 * i
-            color = (
-                max(0, base_color[0] - intensity),
-                max(0, base_color[1] - intensity),
-                max(0, base_color[2] - intensity),
-            )
-            colors.append(color)
-        return colors[::-1]
+def draw_tree(tree_root, colors):
+    tree = nx.DiGraph()
+    pos = {tree_root.id: (0, 0)}
+    tree = tree_root.add_edges(tree, tree_root, pos)
+    node_colors = [colors.get(node, 'skyblue') for node in tree.nodes()]
+    labels = {node[0]: node[1]['label'] for node in tree.nodes(data=True)}
+    plt.figure(figsize=(8, 5))
+    nx.draw(tree, pos=pos, labels=labels, arrows=False, node_size=2500, node_color=node_colors)
+    plt.show()
 
 def main():
     root = Node(1)
@@ -119,10 +117,11 @@ def main():
     root.right.right.left = Node(14)
     root.right.right.right = Node(15)
     
-    print("\nDFS:")
-    root.draw_tree(traversal_type="DFS")  
-    print("\nBFS:")
-    root.draw_tree(traversal_type="BFS")  
+    colors_bfs = bfs_visualize(root, total_steps=15)
+    draw_tree(root, colors_bfs)
+
+    colors_dfs = dfs_visualize(root, total_steps=15)
+    draw_tree(root, colors_dfs)
 
 if __name__ == "__main__":
     main()
